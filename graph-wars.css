@@ -1,0 +1,301 @@
+body
+{
+	font-family: sans-serif;
+}
+
+#hintAnchor
+{
+	position: absolute;
+	right: 0pt;
+	bottom: 100pt;
+}
+
+.nav,
+.highlight,
+.gwt-DialogBox .dialogTop
+{
+	background: yellow;
+}
+
+.gwt-DialogBox .dialogTop,
+.strong
+{
+	font-weight: bold;
+}
+
+.gwt-SuggestBoxPopUp,
+.gwt-DialogBox
+{
+	position: absolute;
+	z-index: 100;
+	background: #CCCCCC;
+}
+
+.gwt-SuggestBoxPopUp .item-selected
+{
+	background: #00FFFF;
+}
+
+.nav
+{
+	background: yellow;
+}
+
+.help_rhyme
+{
+	position: relative; 
+	float: left;
+	margin-right: 20px;
+	margin-bottom: 5px;
+}
+
+.column
+{
+	height: 100%;
+	position: relative;
+	float: left;
+}
+
+.gameListing td
+{
+	padding: 3px;
+}
+
+tr.even
+{
+	background: lavender;
+}
+
+tr.odd
+{
+	background: lightgray;
+}
+
+.cellGrid
+{
+}
+
+.gameListing,
+.ratingListing,
+.borderCollapse
+{
+	border-spacing: 0px;
+	border-collapse: collapse;
+}
+
+.cellGrid tr 
+{
+	height: 12px;
+	padding: 0px;
+}
+
+.cellGrid td
+{
+	border-style: solid;
+	border-width: 1px;
+	border-color: gray;
+	width: 12px;
+	height: 12px;
+	padding: 0px;
+}
+
+.gameCell
+{
+	width: 12px;
+	height: 12px;
+	font-family: Times, serif;
+}
+
+.Home
+{
+	position: relative;
+	left: 1px;
+	top: -4px;
+}
+
+.Outpost
+{
+	position: relative;
+	left: +2px;
+	top: -2px;
+}
+
+.ratingDisplay
+{
+	font-size: smaller;
+	vertical-align: super;
+}
+
+.player0-Home,
+.player0-Outpost
+{
+	color: blue;
+}
+
+.player0-Block
+{
+	background-color: blue;
+}
+
+.player1-Home,
+.player1-Outpost
+{
+	color: red;
+}
+
+.player1-Block
+{
+	background-color: red;
+}
+
+.player2-Home,
+.player2-Outpost
+{
+	color: green;
+}
+
+.player2-Block
+{
+	background-color: green;
+}
+
+.player3-Home,
+.player3-Outpost
+{
+	color: magenta;
+}
+
+.player3-Block
+{
+	background-color: magenta;
+}
+
+.playerTurnHighlight
+{
+	background-color: lightgray;
+}
+
+.gameStatusDisplay
+{
+	font-size: 17pt;
+	font-weight: bold;
+}
+
+.cellStatusDisplay
+{
+	font-size: 8pt;
+}
+
+.dimmer
+{
+	background-color: #cccccc;
+}
+
+.toolbar>tbody>tr>td>*
+{
+	margin-right: 10px;
+}
+
+.gwt-TextBox
+{
+	border: none;
+}
+
+.inviteesInput .gwt-TextBox
+{
+	width: 200px;
+}
+
+.moveSubmitButton,
+.moveResetButton
+{
+	transition: background-color 2s, color 3s;
+}
+
+.moveSubmitButton:enabled
+{
+	background-color: green;
+}
+
+.moveResetButton:enabled
+{
+	background-color: red;
+}
+
+.moveSubmitButton:enabled,
+.moveResetButton:enabled
+{
+	color: white;
+}
+
+.remarkInput
+{
+	border: 1px dotted gray;
+}
+
+.remarkPanel
+{
+	font-family: sans-serif;
+	font-size: 11pt;
+}
+
+.remarkPanel>.playerLabel
+{
+	font-weight: bold;
+}
+
+#gameUi
+{
+	position: relative;
+}
+
+.gameArea
+{
+	float: left;
+}
+
+.gameChat
+{
+	float: left;
+}
+
+@media all and (min-width: 1300px)
+{
+	.gameChat
+	{
+		width: 300px;
+		height: 400px;
+	}
+	
+	.remarkInput
+	{
+		width: 280px
+	}
+	
+	.messageScroll
+	{
+		width: 300px;
+		height: 400px;
+	}
+}
+
+@media all and (max-width: 1299px)
+{
+	.gameChat
+	{
+		clear: both;
+		width: 600px;
+		height: 100px;
+	}
+	
+	.remarkInput
+	{
+		width: 580px;
+	}
+	
+	.messageScroll
+	{
+		width: 600px;
+		height: 100px;
+	}
+}
