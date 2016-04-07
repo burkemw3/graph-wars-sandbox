@@ -1,0 +1,142 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="graph-wars.css">
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<style>
+    table.column { height: auto; }
+</style>
+<script>
+var game = {};
+var players = [];
+var moves = 0;
+var movesPerTurn;
+
+function getCell(x, y) {
+    return $($($("#game-surface tr")[y]).find("td")[x]).find("div");
+}
+function getPlayerIndex(action) {
+    return players.indexOf(action["player"]);
+}
+function setCurrentPlayer() {
+    var playerIndex = Math.floor((moves / movesPerTurn) % players.length);
+    $("#current-player").html(players[playerIndex]);
+    switch (playerIndex) {
+        case 0: $("#current-color").html("Blue"); break;
+        case 1: $("#current-color").html("Red"); break;
+        case 2: $("#current-color").html("Green"); break;
+        case 3: $("#current-color").html("Pink"); break;
+    }
+    $("#moves-remaining").html(movesPerTurn - (moves % movesPerTurn));
+}
+function loadGame() {
+    game = JSON.parse($("#game-events").val().replace(/}\s*,\s*]/, "}]"));
+    movesPerTurn = game["movesPerTurn"];
+
+    $("#game-surface").remove("tr");
+
+    // construct table
+    var row_prototype = $("<tr></tr>");
+    for (var i=0 ; i<game["width"] ; ++i) {
+        row_prototype.append("<td><div class=\"gwt-Label gameCell\"></div></td>");
+    }
+    for (i=0 ; i<game["height"] ; ++i) {
+        $("#game-surface").append(row_prototype.clone());
+    }
+
+    // make moves
+    for (i=0 ; i<game["events"].length ; ++i) {
+        var action = game["events"][i];
+        switch (action["stage"]) {
+            case "Home":
+                var x = 0;
+                var y = 0;
+                if (action["quadrant"].includes("Bottom")) {
+                    var y = game["height"] - 1;
+                }
+                if (action["quadrant"].includes("Right")) {
+                    var x = game["width"] - 1;
+                }
+                players.push(action["player"]);
+                var homeCell = getCell(x, y);
+                homeCell.addClass("Home player" + getPlayerIndex(action) + "-Home");
+                homeCell.html("+");
+                break;
+            case "Outpost":
+                getCell(action["x"], action["y"])
+                    .addClass("Outpost")
+                    .addClass("player" + getPlayerIndex(action) + "-Outpost")
+                    .html("*")
+                    ;
+                moves++;
+                break;
+            case "Block":
+                var cell = getCell(action["x"], action["y"]);
+                $.each(cell.attr('class').split(/\s+/), function(index, item) {
+                    if (item.includes("Outpost")) {
+                        cell.removeClass(item);
+                    }
+                });
+                cell
+                    .addClass("Block")
+                    .addClass("player" + getPlayerIndex(action) + "-Block")
+                    .html("")
+                    ;
+                moves++;
+                break;
+        }
+    }
+
+    setCurrentPlayer();
+}
+
+$(function() {
+    $("#set-game").on("click", function() {
+        var gameKey = prompt("Enter graph-wars game key");
+        $("#game-load-iframe").attr("src", "http://graph-wars.appspot.com/export?format=json&key=" + gameKey);
+    });
+    $("#load-game").on("click", function() {
+        loadGame();
+    });
+
+    // wire up events
+    $("table").on('click', 'div.gameCell', function() {
+        var playerIndex = Math.floor((moves / movesPerTurn) % players.length);
+
+        if ($(this).is('div.player'+playerIndex+'-Outpost') || $(this).is('div.player'+playerIndex+'-Block')) {
+            // own spot, skip it
+        } else if ($(this).hasClass("Outpost")) {
+            var cell = $(this);
+            $.each(cell.attr('class').split(/\s+/), function(index, item) {
+                if (item.includes("Outpost") || item.includes("Home")) {
+                    cell.removeClass(item);
+                }
+            });
+            cell
+                .addClass("Block")
+                .addClass("player" + playerIndex + "-Block")
+                .html("")
+                ;
+            moves++;
+        } else {
+            $(this).addClass("Outpost").addClass("player" + playerIndex + "-Outpost").html("*");
+            moves++;
+        }
+
+        setCurrentPlayer();
+    });
+});
+
+</script>
+</head>
+<body>
+<table id="game-surface" class="cellGrid borderCollapse column"></table>
+<br />
+<div>Current Player: <span id="current-player"></span> (<span id="current-color"></span>)</div>
+<div>Moves remaining: <span id="moves-remaining"></span></div>
+
+<div style="clear:both;"></div>
+
+<button id="set-game">Set Game ID</button><iframe id="game-load-iframe"></iframe><textarea id="game-events"></textarea><button id="load-game">Load Game</button>
+
+</body>
+</html>
