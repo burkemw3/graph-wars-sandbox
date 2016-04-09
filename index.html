@@ -32,7 +32,7 @@ function loadGame() {
     game = JSON.parse($("#game-events").val().replace(/}\s*,\s*]/, "}]"));
     movesPerTurn = game["movesPerTurn"];
 
-    $("#game-surface").remove("tr");
+    $("#game-surface tr").remove();
 
     // construct table
     var row_prototype = $("<tr></tr>");
