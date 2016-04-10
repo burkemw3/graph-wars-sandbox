@@ -40,6 +40,8 @@ function loadGame() {
 
 function loadGameHandler() {
     game = JSON.parse(this.responseText.replace(/}\s*,\s*]/, "}]"));
+    players = [];
+    moves = 0;
     movesPerTurn = game["movesPerTurn"];
 
     $("#game-surface tr").remove();
