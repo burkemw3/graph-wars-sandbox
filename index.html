@@ -10,39 +10,62 @@ var game = {};
 var players = [];
 var moves = 0;
 var movesPerTurn;
+var movesRemaining;
+var currentPlayerIndex;
 var gameKey = "";
 
 function getCell(x, y) {
     return $($($("#game-surface tr")[y]).find("td")[x]).find("div");
 }
-function getPlayerIndex(action) {
-    return players.indexOf(action["player"]);
+
+function loadGame() {
+    gameKey = prompt("Enter graph-wars game key", gameKey);
+    var oReq = new XMLHttpRequest();
+    oReq.addEventListener("load", loadGameHandler);
+    oReq.open("GET", "http://graph-wars.appspot.com/export?format=json&key=" + gameKey);
+    oReq.send();
 }
-function setCurrentPlayer() {
-    var playerIndex = Math.floor((moves / movesPerTurn) % players.length);
-    $("#current-player").html(players[playerIndex]);
-    switch (playerIndex) {
+
+function updateTurnDisplay() {
+    $("#current-player").html(players[currentPlayerIndex].id);
+    switch (currentPlayerIndex) {
         case 0: $("#current-color").html("Blue"); break;
         case 1: $("#current-color").html("Red"); break;
         case 2: $("#current-color").html("Green"); break;
         case 3: $("#current-color").html("Pink"); break;
     }
-    $("#moves-remaining").html(movesPerTurn - (moves % movesPerTurn));
+    $("#moves-remaining").html(movesRemaining);
 }
 
-function loadGame() {
-	gameKey = prompt("Enter graph-wars game key", gameKey);
-	var oReq = new XMLHttpRequest();
-	oReq.addEventListener("load", loadGameHandler);
-	oReq.open("GET", "http://graph-wars.appspot.com/export?format=json&key=" + gameKey);
-	oReq.send();
+function advanceTurn(updatePlayerDisplay) {
+    movesRemaining--;
+
+    if (0 === movesRemaining) {
+        while(true) {
+            currentPlayerIndex++;
+            if (currentPlayerIndex >= players.length) {
+                currentPlayerIndex = 0;
+            }
+            if (true === players[currentPlayerIndex].alive) {
+                break;
+            }
+        }
+
+        movesRemaining = movesPerTurn;
+    }
+
+    if (updatePlayerDisplay) {
+        updateTurnDisplay();
+    }
 }
 
 function loadGameHandler() {
     game = JSON.parse(this.responseText.replace(/}\s*,\s*]/, "}]"));
     players = [];
     moves = 0;
+    currentPlayerIndex = 0;
     movesPerTurn = game["movesPerTurn"];
+    movesRemaining = movesPerTurn;
 
     $("#game-surface tr").remove();
 
@@ -56,6 +79,7 @@ function loadGameHandler() {
     }
 
     // make moves
+    var homeIndex = 0;
     for (i=0 ; i<game["events"].length ; ++i) {
         var action = game["events"][i];
         switch (action["stage"]) {
@@ -68,37 +92,65 @@ function loadGameHandler() {
                 if (action["quadrant"].includes("Right")) {
                     var x = game["width"] - 1;
                 }
-                players.push(action["player"]);
                 var homeCell = getCell(x, y);
-                homeCell.addClass("Home player" + getPlayerIndex(action) + "-Home");
+                homeCell.addClass("Home player" + homeIndex + "-Home");
                 homeCell.html("+");
+                homeIndex++;
+
+                players.push({
+                    id: action["player"],
+                    alive: true
+                });
                 break;
             case "Outpost":
                 getCell(action["x"], action["y"])
                     .addClass("Outpost")
-                    .addClass("player" + getPlayerIndex(action) + "-Outpost")
+                    .addClass("player" + currentPlayerIndex + "-Outpost")
                     .html("*")
                     ;
-                moves++;
+                advanceTurn(false);
                 break;
             case "Block":
                 var cell = getCell(action["x"], action["y"]);
+                var isHome = false;
                 $.each(cell.attr('class').split(/\s+/), function(index, item) {
                     if (item.includes("Outpost")) {
                         cell.removeClass(item);
                     }
+                    if (item.includes("Home")) {
+                        isHome = true;
+                    }
                 });
                 cell
                     .addClass("Block")
-                    .addClass("player" + getPlayerIndex(action) + "-Block")
+                    .addClass("player" + currentPlayerIndex + "-Block")
                     .html("")
                     ;
-                moves++;
+                if (isHome) {
+                    checkForDeath(cell);
+                }
+                advanceTurn(false);
                 break;
         }
     }
 
-    setCurrentPlayer();
+    updateTurnDisplay();
+}
+
+function checkForDeath(cell) {
+    var victimIndex;
+    $.each(cell.attr('class').split(/\s+/), function(index, item) {
+        if (item.includes("-Home")) {
+            victimIndex = item.replace("-Home", "").replace("player", "");
+        }
+    });
+    players[victimIndex].alive = false;
+    cell
+        .removeClass("Home")
+        .addClass("Block")
+        .addClass("player" + currentPlayerIndex + "-Block")
+        .html("")
+        ;
 }
 
 $(function() {
@@ -112,29 +164,30 @@ $(function() {
 
     // wire up events
     $("table").on('click', 'div.gameCell', function() {
-        var playerIndex = Math.floor((moves / movesPerTurn) % players.length);
-
-        if ($(this).is('div.player'+playerIndex+'-Outpost') || $(this).is('div.player'+playerIndex+'-Block')) {
+        if ($(this).is('div.player'+currentPlayerIndex+'-Outpost') || $(this).is('div.player'+currentPlayerIndex+'-Block')) {
             // own spot, skip it
         } else if ($(this).hasClass("Outpost")) {
             var cell = $(this);
             $.each(cell.attr('class').split(/\s+/), function(index, item) {
-                if (item.includes("Outpost") || item.includes("Home")) {
+                if (item.includes("Outpost")) {
                     cell.removeClass(item);
                 }
             });
             cell
                 .addClass("Block")
-                .addClass("player" + playerIndex + "-Block")
+                .addClass("player" + currentPlayerIndex + "-Block")
                 .html("")
                 ;
-            moves++;
+            advanceTurn(true);
+        } else if ($(this).hasClass("Home")) {
+            var cell = $(this);
+            checkForDeath(cell);
+            advanceTurn(true);
         } else {
-            $(this).addClass("Outpost").addClass("player" + playerIndex + "-Outpost").html("*");
+            $(this).addClass("Outpost").addClass("player" + currentPlayerIndex + "-Outpost").html("*");
             moves++;
+            advanceTurn(true);
         }
-
-        setCurrentPlayer();
     });
 });
 
