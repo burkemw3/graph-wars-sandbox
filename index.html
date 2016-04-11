@@ -18,12 +18,18 @@ function getCell(x, y) {
     return $($($("#game-surface tr")[y]).find("td")[x]).find("div");
 }
 
+function errorHandler() {
+    $("#status").html("error loading game");
+}
+
 function loadGame() {
     gameKey = prompt("Enter graph-wars game key", gameKey);
     var oReq = new XMLHttpRequest();
     oReq.addEventListener("load", loadGameHandler);
+    oReq.addEventListener("error", errorHandler);
     oReq.open("GET", "http://graph-wars.appspot.com/export?format=json&key=" + gameKey);
     oReq.send();
+    $("#status").html("Loading ...");
 }
 
 function updateTurnDisplay() {
@@ -135,6 +141,8 @@ function loadGameHandler() {
     }
 
     updateTurnDisplay();
+
+    $("#status").html("");
 }
 
 function checkForDeath(cell) {
@@ -196,6 +204,7 @@ $(function() {
 <body>
 
 <button id="load-game">Load Game</button>
+<div id="status"></div>
 
 <div style="clear:both;"></div>
 
