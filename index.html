@@ -29,7 +29,7 @@ function loadGame() {
     var oReq = new XMLHttpRequest();
     oReq.addEventListener("load", loadGameHandler);
     oReq.addEventListener("error", errorHandler);
-    oReq.open("GET", "http://graph-wars.appspot.com/export?format=json&key=" + gameKey);
+    oReq.open("GET", "//graph-wars.appspot.com/export?format=json&key=" + gameKey);
     oReq.send();
     $("#status").html("Loading ...");
 }
