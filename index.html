@@ -25,13 +25,20 @@ function errorHandler() {
 }
 
 function loadGame() {
-    gameKey = prompt("Enter graph-wars game key", gameKey);
+    var result = prompt("Enter graph-wars game key", gameKey);
+    if (null == result) {
+        return;
+    }
+    gameKey = result;
+
     var oReq = new XMLHttpRequest();
     oReq.addEventListener("load", loadGameHandler);
     oReq.addEventListener("error", errorHandler);
     oReq.open("GET", "//graph-wars.appspot.com/export?format=json&key=" + gameKey);
     oReq.send();
     $("#status").html("Loading ...");
+    $("#skip-this-turn").hide();
+    $("#game-surface").hide();
 }
 
 function updateTurnDisplay() {
@@ -72,6 +79,8 @@ function advanceTurn(updatePlayerDisplay) {
 }
 
 function loadGameHandler() {
+    $("#skip-this-turn").show();
+    $("#game-surface").show();
     game = JSON.parse(this.responseText.replace(/}\s*,\s*]/, "}]"));
     players = [];
     moves = 0;
@@ -173,9 +182,13 @@ $(function() {
     $("#load-game").on("click", function() {
         loadGame();
     });
+    $("#skip-this-turn").on("click", function() {
+        movesRemaining = 1;
+        advanceTurn(true);
+    });
 
     // wire up events
-    $("table").on('click', 'div.gameCell', function() {
+    $("#game-surface").on('click', 'div.gameCell', function() {
         if ($(this).is('div.player'+currentPlayerIndex+'-Outpost') || $(this).is('div.player'+currentPlayerIndex+'-Block')) {
             // own spot, skip it
         } else if ($(this).hasClass("Outpost")) {
@@ -207,7 +220,7 @@ $(function() {
 </head>
 <body>
 
-<button id="load-game">Load Game</button>
+<button id="load-game">Load Game</button> <button id="skip-this-turn" style="display: none;">Skip this turn</button>
 
 <div style="clear:both;"></div>
 
