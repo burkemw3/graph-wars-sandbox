@@ -39,6 +39,7 @@ function loadGame() {
     $("#status").html("Loading ...");
     $("#skip-this-turn").hide();
     $("#game-surface").hide();
+    if (ga) { ga("send", "event", "game", "load"); }
 }
 
 function updateTurnDisplay() {
@@ -175,22 +176,20 @@ function checkForDeath(cell) {
 }
 
 $(function() {
-    $("#set-game").on("click", function() {
-        var gameKey = prompt("Enter graph-wars game key");
-        $("#game-load-iframe").attr("src", "http://graph-wars.appspot.com/export?format=json&key=" + gameKey);
-    });
     $("#load-game").on("click", function() {
         loadGame();
     });
     $("#skip-this-turn").on("click", function() {
         movesRemaining = 1;
         advanceTurn(true);
+        if (ga) { ga("send", "event", "game", "skip turn"); }
     });
 
     // wire up events
     $("#game-surface").on('click', 'div.gameCell', function() {
         if ($(this).is('div.player'+currentPlayerIndex+'-Outpost') || $(this).is('div.player'+currentPlayerIndex+'-Block')) {
             // own spot, skip it
+            return;
         } else if ($(this).hasClass("Outpost")) {
             var cell = $(this);
             $.each(cell.attr('class').split(/\s+/), function(index, item) {
@@ -213,6 +212,7 @@ $(function() {
             moves++;
             advanceTurn(true);
         }
+        if (ga) { ga("send", "event", "game cell", "click"); }
     });
 });
 
