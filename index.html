@@ -29,16 +29,26 @@ function loadGame() {
     if (null == result) {
         return;
     }
-    gameKey = result;
 
-    var oReq = new XMLHttpRequest();
-    oReq.addEventListener("load", loadGameHandler);
-    oReq.addEventListener("error", errorHandler);
-    oReq.open("GET", "//graph-wars.appspot.com/export?format=json&key=" + gameKey);
-    oReq.send();
     $("#status").html("Loading ...");
     $("#skip-this-turn").hide();
     $("#game-surface").hide();
+
+    if (result === gameKey && game != null) {
+        loadGameHandler();
+        if (ga) { ga("send", "event", "game", "reload"); }
+        return;
+    }
+    gameKey = result;
+
+    var oReq = new XMLHttpRequest();
+    oReq.addEventListener("load", function() {
+        game = JSON.parse(this.responseText.replace(/}\s*,\s*]/, "}]"));
+        loadGameHandler();
+    });
+    oReq.addEventListener("error", errorHandler);
+    oReq.open("GET", "//graph-wars.appspot.com/export?format=json&key=" + gameKey);
+    oReq.send();
     if (ga) { ga("send", "event", "game", "load"); }
 }
 
@@ -82,7 +92,6 @@ function advanceTurn(updatePlayerDisplay) {
 function loadGameHandler() {
     $("#skip-this-turn").show();
     $("#game-surface").show();
-    game = JSON.parse(this.responseText.replace(/}\s*,\s*]/, "}]"));
     players = [];
     moves = 0;
     currentPlayerIndex = 0;
