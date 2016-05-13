@@ -43,7 +43,7 @@ function loadGame() {
 
     var oReq = new XMLHttpRequest();
     oReq.addEventListener("load", function() {
-        game = JSON.parse(this.responseText.replace(/}\s*,\s*]/, "}]"));
+        game = JSON.parse(this.responseText.replace(/}\s*,\s*]/, "}]").replace(/\[\s*,\s*{/, "[{"));
         loadGameHandler();
     });
     oReq.addEventListener("error", errorHandler);
