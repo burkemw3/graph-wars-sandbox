@@ -15,6 +15,7 @@ var movesPerTurn;
 var movesRemaining;
 var currentPlayerIndex;
 var gameKey = "";
+var gameKeyUrlRegExp = new RegExp('.*game\\?key=(.*)')
 
 function getCell(x, y) {
     return $($($("#game-surface tr")[y]).find("td")[x]).find("div");
@@ -25,9 +26,14 @@ function errorHandler() {
 }
 
 function loadGame() {
-    var result = prompt("Enter graph-wars game key", gameKey);
+    var result = prompt("Enter graph-wars game URL", gameKey);
     if (null == result) {
         return;
+    }
+
+    var matches = result.match(gameKeyUrlRegExp);
+    if (null != matches) {
+      result = matches[1];
     }
 
     $("#status").html("Loading ...");
